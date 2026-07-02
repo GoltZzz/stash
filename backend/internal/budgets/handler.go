@@ -35,7 +35,7 @@ func (h *budgetHandler) handleGetBudget(w http.ResponseWriter, r *http.Request) 
 
 	budget, err := h.service.GetBudget(r.Context(), &b)
 	if err != nil {
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusNotFound)
 		if err := json.NewEncoder(w).Encode(map[string]string{"error": error.Error(err)}); err != nil {
 			log.Printf("errror: %v", err)
 			return

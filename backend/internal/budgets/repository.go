@@ -22,11 +22,12 @@ func (b budgetRepository) GetBuget(ctx context.Context) (Budget, error) {
 	err := b.db.QueryRowContext(ctx, q).Scan(&budget.ID, &budget.Amount, &budget.Currency, &budget.CreatedAt, &budget.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			log.Printf("get budget query failed: %v", err)
 			return Budget{}, fmt.Errorf("%w", err)
 		}
+		log.Printf("get budget query failed: %v", err)
 		return Budget{}, fmt.Errorf("%w", err)
 	}
-	log.Printf("get budget query failed: %v", err)
 	return budget, nil
 }
 
@@ -41,9 +42,9 @@ func (b *budgetRepository) CreateBudget(ctx context.Context, budget *Budget) (Bu
 	`
 	err := b.db.QueryRowContext(ctx, q, budget.Amount, budget.Currency).Scan(&budget.ID, &budget.Amount, &budget.Currency, &budget.CreatedAt, &budget.UpdatedAt)
 	if err != nil {
+		log.Printf("create budget query failed: %v", err)
 		return Budget{}, fmt.Errorf("%w", err)
 	}
-	log.Printf("create budget query failed: %v", err)
 	return *budget, nil
 }
 
@@ -56,12 +57,13 @@ func (b *budgetRepository) UpdateBudget(ctx context.Context, budget Budget) (Bud
 	err := b.db.QueryRowContext(ctx, q, budget.Amount, budget.Currency, budget.ID).Scan(&budget.ID, &budget.Amount, &budget.Currency, &budget.CreatedAt, &budget.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			log.Printf("update budget query failed: %v", err)
 			return Budget{}, fmt.Errorf("%w", err)
 		}
+		log.Printf("update budget query failed: %v", err)
 		return Budget{}, fmt.Errorf("%w", err)
 	}
 
-	log.Printf("update budget query failed: %v", err)
 	return budget, nil
 }
 
@@ -70,8 +72,8 @@ func (b *budgetRepository) BudgetExist(ctx context.Context) (bool, error) {
 	q := `SELECT EXISTS(SELECT 1 FROM BUDGETS)`
 	err := b.db.QueryRowContext(ctx, q).Scan(&exist)
 	if err != nil {
+		log.Printf("budget exist query failed: %v", err)
 		return exist, err
 	}
-	log.Printf("budget exist query failed: %v", err)
 	return exist, nil
 }
