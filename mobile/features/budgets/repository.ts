@@ -70,6 +70,15 @@ export async function createBudget(
   return rowToBudget(row);
 }
 
+export async function getLatestBudget(
+  db: SQLite.SQLiteDatabase,
+): Promise<Budget | null> {
+  const row = await db.getFirstAsync<BudgetRow>(
+    'SELECT * FROM budgets ORDER BY created_at DESC LIMIT 1',
+  );
+  return row ? rowToBudget(row) : null;
+}
+
 export async function hasSavedBudget(
   db: SQLite.SQLiteDatabase,
 ): Promise<boolean> {

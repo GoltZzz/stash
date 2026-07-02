@@ -1,11 +1,16 @@
 import * as Haptics from 'expo-haptics';
 import { useCallback, useState } from 'react';
+import type { NativeSyntheticEvent, TextInputSelectionChangeEventData } from 'react-native';
 
 import GhostButton from '@/components/onboarding/ui/ghost-button';
 import PrimaryButton from '@/components/onboarding/ui/primary-button';
 import StepShell from '@/components/onboarding/ui/step-shell';
 import { DisplayText } from '@/components/onboarding/ui/display-text';
 import type { BudgetStepProps } from '@/components/onboarding/steps/shared';
+import {
+  formatAmountWithCommas,
+  sanitizeAmountInput,
+} from '@/features/budgets/amount-format';
 import {
   CURRENCIES,
   PERIOD_OPTIONS,
@@ -56,7 +61,29 @@ export default function BudgetStep({
   onBack,
 }: BudgetStepProps) {
   const [amountFocused, setAmountFocused] = useState(false);
+  const formattedAmount = formatAmountWithCommas(values.amount);
+  const [amountSelection, setAmountSelection] = useState({
+    start: formattedAmount.length,
+    end: formattedAmount.length,
+  });
   const showCustomDays = values.periodType === 'custom';
+
+  const handleAmountChange = useCallback(
+    (raw: string) => {
+      const sanitized = sanitizeAmountInput(raw);
+      const formatted = formatAmountWithCommas(sanitized);
+      updateValues({ amount: sanitized });
+      setAmountSelection({ start: formatted.length, end: formatted.length });
+    },
+    [updateValues],
+  );
+
+  const handleAmountSelectionChange = useCallback(
+    (event: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => {
+      setAmountSelection(event.nativeEvent.selection);
+    },
+    [],
+  );
 
   return (
     <StepShell
@@ -88,10 +115,12 @@ export default function BudgetStep({
                 amountFocused ? 'border-fg-orange' : 'border-fg-line'
               }`}
               style={{ fontFamily: 'Fraunces_600SemiBold' }}
-              value={values.amount}
-              onChangeText={(amount) => updateValues({ amount })}
+              value={formattedAmount}
+              onChangeText={handleAmountChange}
               onFocus={() => setAmountFocused(true)}
               onBlur={() => setAmountFocused(false)}
+              selection={amountSelection}
+              onSelectionChange={handleAmountSelectionChange}
               keyboardType="decimal-pad"
               placeholder="0.00"
               placeholderTextColor="rgb(120, 98, 82)"
