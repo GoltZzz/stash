@@ -1,16 +1,32 @@
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { Tabs } from 'expo-router';
+
+import CatTabBar from '@/components/navigation/cat-tab-bar';
 
 export default function AppTabLayout() {
   return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="(home)">
-        <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="(settings)">
-        <NativeTabs.Trigger.Icon sf="gear" md="settings" />
-        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
-      </NativeTabs.Trigger>
-    </NativeTabs>
+    <Tabs
+      tabBar={(props) => <CatTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          position: 'absolute',
+          backgroundColor: 'transparent',
+          borderTopWidth: 0,
+          elevation: 0,
+        },
+      }}>
+      <Tabs.Screen
+        name="(home)"
+        options={{
+          title: 'Stash',
+        }}
+      />
+      <Tabs.Screen
+        name="(settings)"
+        options={{
+          title: 'Den',
+        }}
+      />
+    </Tabs>
   );
 }

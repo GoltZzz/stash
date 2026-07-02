@@ -23,14 +23,14 @@ Use a development build (`npx expo run:ios` / `npx expo run:android`), not Expo 
 
 ## Theming
 
-Two token families live in `src/global.css`:
+The app uses a single theme family (`fg-*` tokens) across both onboarding and the main application. The app forces a light appearance (warm cream + orange) and ignores the phone's system light/dark mode settings.
 
 | Prefix | Usage | Behavior |
 |--------|-------|----------|
-| `sf-*` | Main app screens | Adapts to system light/dark via `light-dark()` and `platformColor()` on iOS |
-| `fg-*` | Onboarding only | Fixed values — always warm cream + orange, immune to system appearance |
+| `fg-*` | Entire app (Onboarding & Main Screens) | Fixed values — always warm cream + orange, immune to system appearance |
+| `sf-*` | Legacy / Unused | Formerly adapted to system light/dark. Do not use for new features. |
 
-### `fg` theme tokens (onboarding)
+### `fg` theme tokens
 
 - `fg-orange` — primary accent / CTAs
 - `fg-orange-deep` — pressed / emphasis
@@ -40,11 +40,11 @@ Two token families live in `src/global.css`:
 - `fg-line` — borders / separators
 - `fg-red` — error text
 
-Use `fg-*` Tailwind classes (e.g. `bg-fg-cream`, `text-fg-ink`) in onboarding. Never use `sf-*` there.
+Use `fg-*` Tailwind classes (e.g. `bg-fg-cream`, `text-fg-ink`) everywhere. Do not use `sf-*` tokens.
 
-### `sf` theme tokens (main app)
-
-- `sf-bg`, `sf-bg-2`, `sf-text`, `sf-text-2`, `sf-blue`, `sf-green`, `sf-red`, `sf-gray`
+### Forced Light Appearance configuration
+- Enforced app-wide via the `ThemeProvider` value (`FgTheme`) and `contentStyle` properties in `app/_layout.tsx`.
+- Status bar style is locked to `dark` globally.
 
 ## Onboarding
 
