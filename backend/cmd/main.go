@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"log/slog"
@@ -12,10 +13,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main(){
-	godotenv.Load("../.env")
+func main() {
+	godotenv.Load(".env", "../.env")
 	db, err := db.ConnectDB()
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 		return
 	}
@@ -24,17 +25,22 @@ func main(){
 	fmt.Println("Connected to Database")
 
 	mux := http.NewServeMux()
-
-	budgets.RegisterBudgetRoutes(mux,db)
+	mux.HandleFunc("/health", handleHealth)
+	budgets.RegisterBudgetRoutes(mux, db)
 
 	svr := http.Server{
-		Addr: ":42069",
+		Addr:    ":42069",
 		Handler: mux,
 	}
 
-	log.Println("App is listening to",svr.Addr)
-	if err := svr.ListenAndServe(); err != nil && err != http.ErrServerClosed{
+	log.Println("App is listening to", svr.Addr)
+	if err := svr.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		slog.Error("server error", err)
 		os.Exit(1)
 	}
+}
+
+func handleHealth(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "API is Healthy"})
 }
