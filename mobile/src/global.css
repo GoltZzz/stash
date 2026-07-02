@@ -1,0 +1,52 @@
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css';
+
+@theme {
+  --color-sf-blue: light-dark(rgb(0 122 255), rgb(10 132 255));
+  --color-sf-green: light-dark(rgb(52 199 89), rgb(48 209 89));
+  --color-sf-red: light-dark(rgb(255 59 48), rgb(255 69 58));
+  --color-sf-gray: rgb(142 142 147);
+  --color-sf-text: light-dark(rgb(0 0 0), rgb(255 255 255));
+  --color-sf-text-2: light-dark(rgb(60 60 67 / 0.6), rgb(235 235 245 / 0.6));
+  --color-sf-bg: light-dark(rgb(255 255 255), rgb(0 0 0));
+  --color-sf-bg-2: light-dark(rgb(242 242 247), rgb(28 28 30));
+
+  /* fg — locked onboarding theme (orange + warm white) */
+  --color-fg-orange: rgb(234 88 12);
+  --color-fg-orange-deep: rgb(194 65 12);
+  --color-fg-orange-soft: rgb(255 237 213);
+  --color-fg-cream: rgb(255 251 245);
+  --color-fg-ink: rgb(41 28 18);
+  --color-fg-ink-2: rgb(120 98 82);
+  --color-fg-line: rgb(234 218 200);
+  --color-fg-red: rgb(220 38 38);
+  --font-fraunces: Fraunces_600SemiBold;
+  --font-fraunces-italic: Fraunces_400Regular_Italic;
+}
+
+@media android {
+  :root {
+    --font-mono: monospace;
+    --font-rounded: normal;
+    --font-serif: serif;
+    --font-sans: normal;
+  }
+}
+
+@media ios {
+  :root {
+    --font-mono: ui-monospace;
+    --font-serif: ui-serif;
+    --font-sans: system-ui;
+    --font-rounded: ui-rounded;
+    --color-sf-blue: platformColor(systemBlue);
+    --color-sf-green: platformColor(systemGreen);
+    --color-sf-red: platformColor(systemRed);
+    --color-sf-gray: platformColor(systemGray);
+    --color-sf-text: platformColor(label);
+    --color-sf-text-2: platformColor(secondaryLabel);
+    --color-sf-bg: platformColor(systemBackground);
+    --color-sf-bg-2: platformColor(secondarySystemBackground);
+  }
+}
