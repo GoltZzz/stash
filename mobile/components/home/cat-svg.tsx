@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { useEffect } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useAnimatedProps,
@@ -20,6 +20,8 @@ type CatSVGProps = {
   size?: number;
   mood?: CatMood;
   onTap?: () => void;
+  interactive?: boolean;
+  selected?: boolean;
 };
 
 // Theme Color Hex Codes (matching the mobile/src/global.css variables)
@@ -377,7 +379,13 @@ const COLOR_MAP: Record<string, string> = {
   'b': COLORS.sweat,
 };
 
-export default function CatSVG({ size = 150, mood = 'good', onTap }: CatSVGProps) {
+export default function CatSVG({
+  size = 150,
+  mood = 'good',
+  onTap,
+  interactive = true,
+  selected,
+}: CatSVGProps) {
   const reducedMotion = useReducedMotion();
 
   // Shared Animation Values
@@ -562,6 +570,26 @@ export default function CatSVG({ size = 150, mood = 'good', onTap }: CatSVGProps
     onTap?.();
   };
 
+  useEffect(() => {
+    if (selected && !reducedMotion) {
+      scaleY.value = withSequence(
+        withTiming(0.85, { duration: 40 }),
+        withTiming(1.12, { duration: 90 }),
+        withSpring(1, { damping: 9, stiffness: 125 })
+      );
+      scaleX.value = withSequence(
+        withTiming(1.15, { duration: 40 }),
+        withTiming(0.9, { duration: 90 }),
+        withSpring(1, { damping: 9, stiffness: 125 })
+      );
+
+      jumpY.value = withSequence(
+        withTiming(-20, { duration: 160, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: 180, easing: Easing.bounce })
+      );
+    }
+  }, [selected, reducedMotion]);
+
   // -------------------------------------------------------------
   // ANIMATED PROPS / STYLES SNAP-MAPPED TO INTEGER GRID COORDINATES
   // Each pixel is exactly 3 SVG units, so translations are rounded to multiples of 3.
@@ -714,8 +742,11 @@ export default function CatSVG({ size = 150, mood = 'good', onTap }: CatSVGProps
     return PATHS_EYES_GOOD_R;
   };
 
+  const RootComponent = interactive ? Pressable : View;
+  const rootProps = interactive ? { onPress: handlePress } : {};
+
   return (
-    <Pressable onPress={handlePress} style={styles.pressableContainer}>
+    <RootComponent {...rootProps} style={styles.pressableContainer}>
       <Animated.View style={{ width: size, height: size }}>
         <Svg viewBox="0 0 160 160" width="100%" height="100%">
           {/* 1. SHADOW (scales dynamically below the body) */}
@@ -766,7 +797,7 @@ export default function CatSVG({ size = 150, mood = 'good', onTap }: CatSVGProps
           </AnimatedG>
         </Svg>
       </Animated.View>
-    </Pressable>
+    </RootComponent>
   );
 }
 

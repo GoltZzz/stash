@@ -1,6 +1,17 @@
-import type { StyleProp, ViewStyle } from 'react-native';
+import { useEffect } from 'react';
+import { StyleProp, ViewStyle } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+  withSpring,
+  Easing,
+  useReducedMotion,
+} from 'react-native-reanimated';
 
 import { View } from '@/tw';
+import { Image } from '@/tw/image';
 
 type CatTabIconProps = {
   name: 'home' | 'settings';
@@ -8,9 +19,10 @@ type CatTabIconProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+const CatHomeIconImage = require('@/assets/images/fg/fg-home-idle.png');
+
 const ORANGE = 'rgb(234, 88, 12)';
 const INK = 'rgb(41, 28, 18)';
-const INK_2 = 'rgb(120, 98, 82)';
 
 function PawIcon({ color }: { color: string }) {
   return (
@@ -75,11 +87,58 @@ function WhiskersIcon({ color }: { color: string }) {
 }
 
 export default function CatTabIcon({ name, selected, style }: CatTabIconProps) {
-  const color = selected ? ORANGE : INK_2;
+  const jumpY = useSharedValue(0);
+  const scaleX = useSharedValue(1);
+  const scaleY = useSharedValue(1);
+  const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (name === 'home' && selected && !reducedMotion) {
+      jumpY.value = 0;
+      scaleX.value = 1;
+      scaleY.value = 1;
+
+      scaleY.value = withSequence(
+        withTiming(0.94, { duration: 30 }),
+        withTiming(1.04, { duration: 50 }),
+        withSpring(1, { damping: 9, stiffness: 125 })
+      );
+      scaleX.value = withSequence(
+        withTiming(1.06, { duration: 30 }),
+        withTiming(0.96, { duration: 50 }),
+        withSpring(1, { damping: 9, stiffness: 125 })
+      );
+
+      jumpY.value = withSequence(
+        withTiming(-5, { duration: 70, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: 80, easing: Easing.bounce })
+      );
+    }
+  }, [selected, reducedMotion, name, jumpY, scaleX, scaleY]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateY: jumpY.value },
+        { scaleX: scaleX.value },
+        { scaleY: scaleY.value },
+      ],
+    };
+  });
 
   return (
-    <View style={style}>
-      {name === 'home' ? <PawIcon color={color} /> : <WhiskersIcon color={selected ? ORANGE : INK} />}
+    <View style={[style, { opacity: selected ? 1 : 0.4 }]}>
+      {name === 'home' ? (
+        <Animated.View style={animatedStyle}>
+          <Image
+            source={CatHomeIconImage}
+            className="w-8 h-8"
+            contentFit="contain"
+          />
+        </Animated.View>
+      ) : (
+        <WhiskersIcon color={selected ? ORANGE : INK} />
+      )}
     </View>
   );
 }

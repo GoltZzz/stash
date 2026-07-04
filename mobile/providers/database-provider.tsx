@@ -10,11 +10,14 @@ import React, {
 import { getDatabase } from '@/db/client';
 import {
   createBudget,
+  getLatestBudget,
   hasCompletedOnboarding,
   hasSavedBudget,
   markOnboardingComplete,
 } from '@/features/budgets/repository';
-import type { BudgetPayload } from '@/features/budgets/types';
+import type { Budget, BudgetPayload } from '@/features/budgets/types';
+import { daysLeftInPeriod, periodLengthDays } from '@/components/home/budget-helpers';
+import type { CatMood } from '@/components/home/cat-sprite';
 
 type DatabaseStatus = 'loading' | 'ready' | 'error';
 
@@ -23,8 +26,26 @@ type DatabaseContextValue = {
   error: Error | null;
   onboardingComplete: boolean;
   resumeAtCelebration: boolean;
+  latestBudget: Budget | null;
+  catMood: CatMood;
+  reloadLatestBudget: () => Promise<void>;
   saveBudget: (payload: BudgetPayload) => Promise<void>;
   finishOnboarding: () => Promise<void>;
+};
+
+const getCatMood = (budget: Budget | null, loading: boolean): CatMood => {
+  if (loading) return 'good';
+  if (!budget) return 'walking';
+
+  const daysLeft = daysLeftInPeriod(budget);
+  const length = periodLengthDays(budget);
+  const ratio = daysLeft / length;
+
+  if (daysLeft === 0) return 'empty';
+  if (ratio <= 0.05) return 'critical';
+  if (ratio <= 0.25) return 'warning';
+  if (ratio <= 0.50) return 'walking';
+  return 'good';
 };
 
 const DatabaseContext = createContext<DatabaseContextValue>({
@@ -32,6 +53,9 @@ const DatabaseContext = createContext<DatabaseContextValue>({
   error: null,
   onboardingComplete: false,
   resumeAtCelebration: false,
+  latestBudget: null,
+  catMood: 'walking',
+  reloadLatestBudget: async () => {},
   saveBudget: async () => {},
   finishOnboarding: async () => {},
 });
@@ -41,6 +65,17 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
   const [resumeAtCelebration, setResumeAtCelebration] = useState(false);
+  const [latestBudget, setLatestBudget] = useState<Budget | null>(null);
+
+  const reloadLatestBudget = useCallback(async () => {
+    try {
+      const db = await getDatabase();
+      const result = await getLatestBudget(db);
+      setLatestBudget(result);
+    } catch (err) {
+      console.error('Failed to reload latest budget:', err);
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,9 +84,11 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
       .then(async (db) => {
         const completed = await hasCompletedOnboarding(db);
         const savedBudget = completed ? false : await hasSavedBudget(db);
+        const budget = await getLatestBudget(db);
         if (!cancelled) {
           setOnboardingComplete(completed);
           setResumeAtCelebration(savedBudget);
+          setLatestBudget(budget);
           setStatus('ready');
           setError(null);
         }
@@ -70,8 +107,9 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
 
   const saveBudget = useCallback(async (payload: BudgetPayload) => {
     const db = await getDatabase();
-    await createBudget(db, payload);
+    const newBudget = await createBudget(db, payload);
     setResumeAtCelebration(true);
+    setLatestBudget(newBudget);
   }, []);
 
   const finishOnboarding = useCallback(async () => {
@@ -79,7 +117,13 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
     await markOnboardingComplete(db);
     setOnboardingComplete(true);
     setResumeAtCelebration(false);
+    const budget = await getLatestBudget(db);
+    setLatestBudget(budget);
   }, []);
+
+  const catMood = useMemo(() => {
+    return getCatMood(latestBudget, status === 'loading');
+  }, [latestBudget, status]);
 
   const value = useMemo(
     () => ({
@@ -87,6 +131,9 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
       error,
       onboardingComplete,
       resumeAtCelebration,
+      latestBudget,
+      catMood,
+      reloadLatestBudget,
       saveBudget,
       finishOnboarding,
     }),
@@ -95,6 +142,9 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
       error,
       onboardingComplete,
       resumeAtCelebration,
+      latestBudget,
+      catMood,
+      reloadLatestBudget,
       saveBudget,
       finishOnboarding,
     ],
