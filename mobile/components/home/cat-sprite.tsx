@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import * as Haptics from 'expo-haptics';
-import Cat3D from './cat-3d';
+import CatSVG from './cat-svg';
 import { Text, View } from '@/tw';
 import { Animated } from '@/tw/animated';
 
@@ -56,7 +56,7 @@ export default function CatSprite({ size = 150, mood = 'good', onTap }: CatSprit
         </Animated.View>
       ) : null}
 
-      <Cat3D size={size} mood={mood} onTap={handlePress} />
+      <CatSVG size={size} mood={mood} onTap={handlePress} />
     </View>
   );
 }
