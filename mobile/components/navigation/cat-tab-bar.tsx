@@ -13,7 +13,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import CatTabIcon from '@/components/navigation/cat-tab-icon';
-import ScratchEdge from '@/components/navigation/scratch-edge';
 import { Pressable, Text, View } from '@/tw';
 import { Animated } from '@/tw/animated';
 
@@ -88,12 +87,6 @@ function TabItem({
             pillStyle,
           ]}
         />
-        {selected ? (
-          <>
-            <ScratchEdge side="left" style={{ left: -6 }} />
-            <ScratchEdge side="right" style={{ right: -6 }} />
-          </>
-        ) : null}
         <CatTabIcon name={icon} selected={selected} />
         <Animated.View style={labelStyle}>
           <Text

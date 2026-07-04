@@ -1,72 +1,62 @@
-import { useEffect } from 'react';
-import {
-  Easing,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
-
-import { View } from '@/tw';
+import { useEffect, useState } from 'react';
+import * as Haptics from 'expo-haptics';
+import Cat3D from './cat-3d';
+import { Text, View } from '@/tw';
 import { Animated } from '@/tw/animated';
-import { Image } from '@/tw/image';
 
-// Single idle frame animated as a stepped 4-"frame" sprite cycle:
-// Easing.steps quantizes the timeline so the cat jumps between poses
-// (bob + squash) instead of tweening smoothly, mimicking pixel-art sprites.
-const FRAME_COUNT = 4;
-const CYCLE_MS = 1600;
-
-const FRAMES = [0, 1, 2, 3, 4];
-const BOB_Y = [0, -3, -6, -3, 0];
-const SQUASH_X = [1, 1.015, 1.03, 1.015, 1];
-const SQUASH_Y = [1, 0.985, 0.97, 0.985, 1];
+export type CatMood = 'good' | 'warning' | 'critical' | 'empty' | 'walking';
 
 type CatSpriteProps = {
   size?: number;
+  mood?: CatMood;
+  onTap?: () => void;
 };
 
-export default function CatSprite({ size = 168 }: CatSpriteProps) {
-  const frame = useSharedValue(0);
+const MEOW_SOUNDS = [
+  'Meow!',
+  'Mew~',
+  'Purr...',
+  'Mrrp!',
+  'Nya!',
+  'Meow-ment!',
+  '🐾',
+];
 
+export default function CatSprite({ size = 150, mood = 'good', onTap }: CatSpriteProps) {
+  const [meowText, setMeowText] = useState<string | null>(null);
+
+  const handlePress = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const randomMeow = MEOW_SOUNDS[Math.floor(Math.random() * MEOW_SOUNDS.length)];
+    setMeowText(randomMeow);
+    onTap?.();
+  };
+
+  // Sound/text timer helper
   useEffect(() => {
-    frame.value = withRepeat(
-      withTiming(FRAME_COUNT, {
-        duration: CYCLE_MS,
-        easing: Easing.steps(FRAME_COUNT, false),
-      }),
-      -1,
-      false,
-    );
-  }, [frame]);
-
-  const spriteStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: interpolate(frame.value, FRAMES, BOB_Y) },
-      { scaleX: interpolate(frame.value, FRAMES, SQUASH_X) },
-      { scaleY: interpolate(frame.value, FRAMES, SQUASH_Y) },
-    ],
-  }));
-
-  const shadowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(frame.value, [0, 2, 4], [0.16, 0.1, 0.16]),
-    transform: [{ scaleX: interpolate(frame.value, [0, 2, 4], [1, 0.88, 1]) }],
-  }));
+    if (!meowText) return;
+    const timer = setTimeout(() => setMeowText(null), 1600);
+    return () => clearTimeout(timer);
+  }, [meowText]);
 
   return (
-    <View className="items-center">
-      <Animated.View style={spriteStyle}>
-        <Image
-          source={require('../../assets/images/fg/fg-idle.png')}
-          contentFit="contain"
-          style={{ width: size, height: size }}
-        />
-      </Animated.View>
-      <Animated.View
-        className="rounded-full bg-fg-ink"
-        style={[{ width: size * 0.5, height: 10, marginTop: -2 }, shadowStyle]}
-      />
+    <View className="items-center relative overflow-visible" style={{ width: size, height: size }}>
+      {meowText ? (
+        <Animated.View
+          className="absolute -top-6 bg-fg-ink px-2.5 py-1 rounded-full border border-fg-line/20 shadow-sm"
+          style={{
+            zIndex: 50,
+            boxShadow: '0 2px 8px rgba(41, 28, 18, 0.15)',
+          }}>
+          <Text className="text-[11px] font-bold text-fg-cream">{meowText}</Text>
+          <View
+            className="absolute bottom-[-3px] left-1/2 -ml-1 w-2 h-2 bg-fg-ink rotate-45"
+            style={{ zIndex: -1 }}
+          />
+        </Animated.View>
+      ) : null}
+
+      <Cat3D size={size} mood={mood} onTap={handlePress} />
     </View>
   );
 }
