@@ -22,6 +22,12 @@ export default function AppTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="(play)"
+        options={{
+          title: 'Play',
+        }}
+      />
+      <Tabs.Screen
         name="(settings)"
         options={{
           title: 'Den',

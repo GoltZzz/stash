@@ -2,11 +2,13 @@ import { Stack } from 'expo-router/stack';
 
 export const unstable_settings = {
   index: { anchor: 'index' },
+  play: { anchor: 'play' },
   settings: { anchor: 'settings' },
 };
 
 const screenNames: Record<string, string> = {
   home: 'index',
+  play: 'play',
   settings: 'settings',
 };
 

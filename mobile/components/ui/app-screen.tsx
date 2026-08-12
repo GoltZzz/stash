@@ -10,12 +10,13 @@ const TAB_BAR_ESTIMATED_HEIGHT = 76;
 type AppScreenProps = {
   children: ReactNode;
   contentClassName?: string;
+  noTopPadding?: boolean;
 };
 
-export default function AppScreen({ children, contentClassName }: AppScreenProps) {
+export default function AppScreen({ children, contentClassName, noTopPadding }: AppScreenProps) {
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, Platform.OS === 'android' ? 12 : 8);
-  const bottomPad = TAB_BAR_ESTIMATED_HEIGHT + bottomInset + 16;
+  const bottomPad = TAB_BAR_ESTIMATED_HEIGHT + bottomInset + 16 + 12; // Extra 12pt bottom float clearance
 
   return (
     <ScrollView
@@ -23,7 +24,7 @@ export default function AppScreen({ children, contentClassName }: AppScreenProps
       contentInsetAdjustmentBehavior="automatic"
       contentContainerClassName={contentClassName ? `gap-6 px-6 ${contentClassName}` : 'gap-6 px-6'}
       contentContainerStyle={{
-        paddingTop: insets.top + 16,
+        paddingTop: noTopPadding ? 0 : insets.top + 12,
         paddingBottom: bottomPad,
       }}>
       {children}

@@ -115,3 +115,37 @@ export async function completeOnboarding(
 
   return budget;
 }
+
+export async function updateBudget(
+  db: SQLite.SQLiteDatabase,
+  id: string,
+  payload: BudgetPayload,
+): Promise<Budget> {
+  const now = new Date().toISOString();
+  const periodDays =
+    payload.periodType === 'custom' ? (payload.periodDays ?? null) : null;
+
+  await db.runAsync(
+    `UPDATE budgets
+     SET amount = ?, currency = ?, period_type = ?, period_days = ?, updated_at = ?
+     WHERE id = ?`,
+    payload.amount,
+    payload.currency,
+    payload.periodType,
+    periodDays,
+    now,
+    id,
+  );
+
+  const row = await db.getFirstAsync<BudgetRow>(
+    'SELECT * FROM budgets WHERE id = ?',
+    id,
+  );
+
+  if (!row) {
+    throw new Error('Failed to update budget');
+  }
+
+  return rowToBudget(row);
+}
+

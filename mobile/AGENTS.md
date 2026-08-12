@@ -1,6 +1,16 @@
 # Stash Mobile
 
-Read Expo v55 docs: https://docs.expo.dev/versions/v55.0.0/
+Read Expo v54 docs: https://docs.expo.dev/versions/v54.0.0/
+
+## Design Context
+
+Strategic and visual specs for AI agents:
+
+- **PRODUCT.md** — register (`product`), users, brand personality, anti-references, design principles
+- **DESIGN.md** — `fg-*` tokens, typography (Fraunces + system sans), components, motion, do's/don'ts
+- **`.impeccable/design.json`** — machine-readable sidecar (shadows, motion, component snippets)
+
+North star: **"The Cozy Den"** — warm cream + orange, cat personality in chrome (tab bar, heroes, empty states), task-first content elsewhere. Always use `fg-*` tokens; never `sf-*`.
 
 ## Scope
 
@@ -10,16 +20,24 @@ Read Expo v55 docs: https://docs.expo.dev/versions/v55.0.0/
 
 ## Stack
 
-- Expo 55, Expo Router, TypeScript
+- Expo 54, Expo Router, TypeScript
 - Tailwind v4 + NativeWind v5 + react-native-css (`@/tw` components)
 - `react-native-reanimated` for animations; `expo-haptics` for tactile feedback
 - `@expo-google-fonts/fraunces` for onboarding display type
 - Offline-first: local SQLite (`expo-sqlite`), no sync in v1 foundation
-- NativeTabs navigation (`expo-router/unstable-native-tabs`)
+- Custom tab bar (`components/navigation/cat-tab-bar.tsx`) over React Navigation bottom tabs
 
-## Dev builds
+## Running the app
 
-Use a development build (`npx expo run:ios` / `npx expo run:android`), not Expo Go — required for `expo-sqlite`, `expo-dev-client`, and native modules.
+Runs in **Expo Go** — no development build needed:
+
+```
+npx expo start
+```
+
+Every dependency is bundled in Expo Go (including `expo-sqlite`). Keep it that way: adding any third-party native module (Rive, Nitro, `@expo/ui`, `expo-gl`) forces a dev build and breaks this workflow. Check before adding a dependency.
+
+Pinned to SDK 54 deliberately — Expo Go only ever supports the latest SDK it ships with, so do not bump the SDK without confirming the target device's Expo Go supports it.
 
 ## Theming
 

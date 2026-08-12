@@ -14,6 +14,7 @@ import {
   hasCompletedOnboarding,
   hasSavedBudget,
   markOnboardingComplete,
+  updateBudget as dbUpdateBudget,
 } from '@/features/budgets/repository';
 import type { Budget, BudgetPayload } from '@/features/budgets/types';
 import { daysLeftInPeriod, periodLengthDays } from '@/components/home/budget-helpers';
@@ -30,6 +31,7 @@ type DatabaseContextValue = {
   catMood: CatMood;
   reloadLatestBudget: () => Promise<void>;
   saveBudget: (payload: BudgetPayload) => Promise<void>;
+  modifyBudget: (id: string, payload: BudgetPayload) => Promise<void>;
   finishOnboarding: () => Promise<void>;
 };
 
@@ -57,6 +59,7 @@ const DatabaseContext = createContext<DatabaseContextValue>({
   catMood: 'walking',
   reloadLatestBudget: async () => {},
   saveBudget: async () => {},
+  modifyBudget: async () => {},
   finishOnboarding: async () => {},
 });
 
@@ -112,6 +115,12 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
     setLatestBudget(newBudget);
   }, []);
 
+  const modifyBudget = useCallback(async (id: string, payload: BudgetPayload) => {
+    const db = await getDatabase();
+    const updated = await dbUpdateBudget(db, id, payload);
+    setLatestBudget(updated);
+  }, []);
+
   const finishOnboarding = useCallback(async () => {
     const db = await getDatabase();
     await markOnboardingComplete(db);
@@ -135,6 +144,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
       catMood,
       reloadLatestBudget,
       saveBudget,
+      modifyBudget,
       finishOnboarding,
     }),
     [
@@ -146,6 +156,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
       catMood,
       reloadLatestBudget,
       saveBudget,
+      modifyBudget,
       finishOnboarding,
     ],
   );

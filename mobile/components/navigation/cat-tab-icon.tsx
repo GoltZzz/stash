@@ -14,7 +14,7 @@ import { View } from '@/tw';
 import { Image } from '@/tw/image';
 
 type CatTabIconProps = {
-  name: 'home' | 'settings';
+  name: 'home' | 'play' | 'settings';
   selected: boolean;
   style?: StyleProp<ViewStyle>;
 };
@@ -38,6 +38,64 @@ function PawIcon({ color }: { color: string }) {
         <View className="rounded-full" style={{ width: 5, height: 6, backgroundColor: color, marginTop: -2 }} />
         <View className="rounded-full" style={{ width: 5, height: 6, backgroundColor: color }} />
       </View>
+    </View>
+  );
+}
+
+function YarnIcon({ color }: { color: string }) {
+  return (
+    <View className="items-center justify-center" style={{ width: 26, height: 26 }}>
+      {/* Outer yarn ball */}
+      <View
+        className="rounded-full justify-center items-center relative overflow-hidden"
+        style={{
+          width: 18,
+          height: 18,
+          borderColor: color,
+          borderWidth: 1.5,
+        }}
+      >
+        {/* Wrapping threads */}
+        <View
+          className="absolute"
+          style={{
+            width: 18,
+            height: 18,
+            borderRadius: 9,
+            borderLeftWidth: 1.5,
+            borderRightWidth: 1.5,
+            borderColor: color,
+            transform: [{ rotate: '30deg' }],
+          }}
+        />
+        <View
+          className="absolute"
+          style={{
+            width: 18,
+            height: 18,
+            borderRadius: 9,
+            borderLeftWidth: 1.5,
+            borderRightWidth: 1.5,
+            borderColor: color,
+            transform: [{ rotate: '-30deg' }],
+          }}
+        />
+      </View>
+      {/* Loose thread trail */}
+      <View
+        className="absolute"
+        style={{
+          width: 6,
+          height: 6,
+          borderBottomWidth: 1.5,
+          borderLeftWidth: 1.5,
+          borderColor: color,
+          bottom: 2,
+          right: 2,
+          borderBottomLeftRadius: 3,
+          transform: [{ rotate: '15deg' }],
+        }}
+      />
     </View>
   );
 }
@@ -93,7 +151,7 @@ export default function CatTabIcon({ name, selected, style }: CatTabIconProps) {
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (name === 'home' && selected && !reducedMotion) {
+    if ((name === 'home' || name === 'play') && selected && !reducedMotion) {
       jumpY.value = 0;
       scaleX.value = 1;
       scaleY.value = 1;
@@ -130,14 +188,14 @@ export default function CatTabIcon({ name, selected, style }: CatTabIconProps) {
     <View style={[style, { opacity: selected ? 1 : 0.4 }]}>
       {name === 'home' ? (
         <Animated.View style={animatedStyle}>
-          <Image
-            source={CatHomeIconImage}
-            className="w-8 h-8"
-            contentFit="contain"
-          />
+          <PawIcon color={selected ? ORANGE : INK} />
+        </Animated.View>
+      ) : name === 'play' ? (
+        <Animated.View style={animatedStyle}>
+          <YarnIcon color={selected ? ORANGE : INK} />
         </Animated.View>
       ) : (
-        <WhiskersIcon color={selected ? ORANGE : INK} />
+        <WhiskersIcon color={INK} />
       )}
     </View>
   );

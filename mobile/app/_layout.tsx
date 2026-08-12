@@ -9,12 +9,13 @@ import {
 import {
   DefaultTheme,
   ThemeProvider,
-} from "expo-router/react-navigation";
+} from "@react-navigation/native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { ActivityIndicator } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { View } from "@/tw";
 
@@ -77,8 +78,10 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <DatabaseProvider>
-      <RootNavigator />
-    </DatabaseProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <DatabaseProvider>
+        <RootNavigator />
+      </DatabaseProvider>
+    </GestureHandlerRootView>
   );
 }

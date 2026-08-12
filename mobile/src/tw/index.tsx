@@ -70,7 +70,6 @@ export const AnimatedScrollView = (
     contentContainerClassName?: string;
   },
 ) => {
-  // @ts-expect-error react-native-css nightly typing depth
   return useCssElement(Animated.ScrollView, props, {
     className: 'style',
     contentClassName: 'contentContainerStyle',
