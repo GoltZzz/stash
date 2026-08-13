@@ -13,6 +13,7 @@ import {
 import BudgetChips from '@/components/home/budget-chips';
 import AppScreen from '@/components/ui/app-screen';
 import CatStatus from '@/components/home/cat-status';
+import CatMascot from '@/components/mascot/cat-mascot';
 import { useDatabase } from '@/providers/database-provider';
 import { Text, View } from '@/tw';
 import { Animated } from '@/tw/animated';
@@ -77,14 +78,21 @@ export default function HomeScreen() {
         </View>
       </Animated.View>
 
-      {/* 2. Cat Status Speech Bubble (Arrow pointing up to the Hero Card) */}
+      {/* 2. The cat itself — the speech bubble below points up at it */}
+      <Animated.View
+        entering={FadeInDown.delay(80).duration(600)}
+        className="items-center -mb-2">
+        <CatMascot size={188} />
+      </Animated.View>
+
+      {/* 3. Cat Status Speech Bubble (Arrow pointing up to the cat) */}
       {budget ? (
-        <Animated.View entering={FadeInDown.delay(100).duration(500)}>
+        <Animated.View entering={FadeInDown.delay(160).duration(500)}>
           <CatStatus message={statusMsg} />
         </Animated.View>
       ) : null}
 
-      {/* 3. Budget Dashboard */}
+      {/* 4. Budget Dashboard */}
       {budget ? (
         <Animated.View entering={FadeInDown.delay(180).duration(500)}>
           <BudgetChips budget={budget} />

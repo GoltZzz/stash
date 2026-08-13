@@ -14,7 +14,7 @@ import { View } from '@/tw';
 import { Image } from '@/tw/image';
 
 type CatTabIconProps = {
-  name: 'home' | 'play' | 'settings';
+  name: 'home' | 'play' | 'settings' | 'lab';
   selected: boolean;
   style?: StyleProp<ViewStyle>;
 };
@@ -144,6 +144,34 @@ function WhiskersIcon({ color }: { color: string }) {
   );
 }
 
+function PixelIcon({ color }: { color: string }) {
+  // A chunky 3x3 pixel cluster — reads as "pixel art" at tab-bar size
+  const cells = [
+    [1, 1, 0],
+    [1, 1, 1],
+    [0, 1, 1],
+  ];
+  return (
+    <View className="items-center justify-center" style={{ width: 26, height: 26 }}>
+      {cells.map((row, y) => (
+        <View key={y} className="flex-row">
+          {row.map((on, x) => (
+            <View
+              key={x}
+              style={{
+                width: 6,
+                height: 6,
+                margin: 0.5,
+                backgroundColor: on ? color : 'transparent',
+              }}
+            />
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export default function CatTabIcon({ name, selected, style }: CatTabIconProps) {
   const jumpY = useSharedValue(0);
   const scaleX = useSharedValue(1);
@@ -194,6 +222,8 @@ export default function CatTabIcon({ name, selected, style }: CatTabIconProps) {
         <Animated.View style={animatedStyle}>
           <YarnIcon color={selected ? ORANGE : INK} />
         </Animated.View>
+      ) : name === 'lab' ? (
+        <PixelIcon color={selected ? ORANGE : INK} />
       ) : (
         <WhiskersIcon color={INK} />
       )}

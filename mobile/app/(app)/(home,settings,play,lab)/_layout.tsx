@@ -4,12 +4,14 @@ export const unstable_settings = {
   index: { anchor: 'index' },
   play: { anchor: 'play' },
   settings: { anchor: 'settings' },
+  lab: { anchor: 'lab' },
 };
 
 const screenNames: Record<string, string> = {
   home: 'index',
   play: 'play',
   settings: 'settings',
+  lab: 'lab',
 };
 
 export default function TabStackLayout({ segment }: { segment: string }) {

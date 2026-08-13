@@ -22,18 +22,21 @@ import { Image } from '@/tw/image';
 import { SheetStackProvider } from '@/components/navigation/sheet-stack-context';
 import SuccessToast from '@/components/ui/success-toast';
 
+type TabIconName = 'home' | 'play' | 'settings' | 'lab';
+
 type TabConfig = {
   label: string;
-  icon: 'home' | 'play' | 'settings';
+  icon: TabIconName;
 };
 
 const TAB_CONFIG: Record<string, TabConfig> = {
   '(home)': { label: 'Stash', icon: 'home' },
   '(play)': { label: 'Play', icon: 'play' },
   '(settings)': { label: 'Den', icon: 'settings' },
+  '(lab)': { label: 'Lab', icon: 'lab' },
 };
 
-function routeIcon(name: string): 'home' | 'play' | 'settings' {
+function routeIcon(name: string): TabIconName {
   return TAB_CONFIG[name]?.icon ?? 'home';
 }
 
@@ -50,7 +53,7 @@ function TabItem({
   reducedMotion,
 }: {
   label: string;
-  icon: 'home' | 'play' | 'settings';
+  icon: TabIconName;
   selected: boolean;
   onPress: () => void;
   onLongPress: () => void;

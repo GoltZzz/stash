@@ -33,6 +33,12 @@ export default function AppTabLayout() {
           title: 'Den',
         }}
       />
+      <Tabs.Screen
+        name="(lab)"
+        options={{
+          title: 'Lab',
+        }}
+      />
     </Tabs>
   );
 }
