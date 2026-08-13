@@ -54,11 +54,33 @@ const FUR_LIGHT = 'rgb(246, 148, 88)';
 const EAR_INNER = 'rgb(255, 214, 196)';
 const BLUSH = 'rgba(224, 90, 60, 0.16)';
 
-type LayerProps = { w: number; h: number };
+/**
+ * Anchor points in canvas coordinates, shared with any component that composes
+ * these layers on its own canvas (see `cat-mascot-head.tsx`). Kept here so the
+ * pivots stay attached to the artwork they belong to — move a path and the
+ * pivot that drives it is one screenful away.
+ */
+export const HEAD_ANCHORS = {
+  /** Ear bases. */
+  earPivotY: 60,
+  earLPivotX: 78,
+  earRPivotX: 122,
+  /** Eye line, for blinks and widening. */
+  eyeLineY: 88,
+  /** Chin, for squashing the head against. */
+  chinY: 129,
+} as const;
 
-function Stage({ w, h, children }: LayerProps & { children: React.ReactNode }) {
+/**
+ * `viewBox` defaults to the full body canvas. Passing a tighter one crops to a
+ * region — the layers keep drawing at their usual coordinates, the box just
+ * decides how much of that gets shown.
+ */
+type LayerProps = { w: number; h: number; viewBox?: string };
+
+function Stage({ w, h, viewBox, children }: LayerProps & { children: React.ReactNode }) {
   return (
-    <Svg width={w} height={h} viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}>
+    <Svg width={w} height={h} viewBox={viewBox ?? `0 0 ${CANVAS_W} ${CANVAS_H}`}>
       {children}
     </Svg>
   );
@@ -169,9 +191,9 @@ function PawsLayer({ w, h }: LayerProps) {
   );
 }
 
-function HeadLayer({ w, h }: LayerProps) {
+export function HeadLayer({ w, h, viewBox, whiskers = true }: LayerProps & { whiskers?: boolean }) {
   return (
-    <Stage w={w} h={h}>
+    <Stage w={w} h={h} viewBox={viewBox}>
       <Defs>
         <LinearGradient id="catHeadFur" x1="0" y1="0" x2="0" y2="1">
           <Stop offset="0" stopColor={FUR_LIGHT} />
@@ -240,29 +262,31 @@ function HeadLayer({ w, h }: LayerProps) {
         strokeLinecap="round"
         fill="none"
       />
-      {/* Whiskers */}
-      {[
-        'M 76,108 L 52,101',
-        'M 75,112 L 50,111',
-        'M 76,116 L 53,121',
-        'M 124,108 L 148,101',
-        'M 125,112 L 150,111',
-        'M 124,116 L 147,121',
-      ].map((d) => (
-        <Path
-          key={d}
-          d={d}
-          stroke={INK_2}
-          strokeWidth={1.3}
-          strokeLinecap="round"
-          opacity={0.45}
-        />
-      ))}
+      {/* Whiskers. Dropped when the head is drawn small — at icon size these
+          land under a pixel wide and only muddy the silhouette. */}
+      {whiskers &&
+        [
+          'M 76,108 L 52,101',
+          'M 75,112 L 50,111',
+          'M 76,116 L 53,121',
+          'M 124,108 L 148,101',
+          'M 125,112 L 150,111',
+          'M 124,116 L 147,121',
+        ].map((d) => (
+          <Path
+            key={d}
+            d={d}
+            stroke={INK_2}
+            strokeWidth={1.3}
+            strokeLinecap="round"
+            opacity={0.45}
+          />
+        ))}
     </Stage>
   );
 }
 
-function EarLayer({ w, h, side }: LayerProps & { side: 'left' | 'right' }) {
+export function EarLayer({ w, h, viewBox, side }: LayerProps & { side: 'left' | 'right' }) {
   const outer =
     side === 'left'
       ? 'M 62,64 C 56,50 58,36 66,33 C 76,36 86,46 90,56 C 80,58 68,60 62,64 Z'
@@ -273,18 +297,18 @@ function EarLayer({ w, h, side }: LayerProps & { side: 'left' | 'right' }) {
       : 'M 132,56 C 135,47 134,40 130,38 C 124,42 119,49 117,55 C 123,55 129,55 132,56 Z';
 
   return (
-    <Stage w={w} h={h}>
+    <Stage w={w} h={h} viewBox={viewBox}>
       <Path d={outer} fill={FUR} />
       <Path d={inner} fill={EAR_INNER} />
     </Stage>
   );
 }
 
-function EyesLayer({ w, h }: LayerProps) {
+export function EyesLayer({ w, h, viewBox }: LayerProps) {
   return (
-    <Stage w={w} h={h}>
+    <Stage w={w} h={h} viewBox={viewBox}>
       {[83, 117].map((cx) => (
-        <Ellipse key={cx} cx={cx} cy={88} rx={8} ry={8.5} fill={INK} />
+        <Ellipse key={cx} cx={cx} cy={HEAD_ANCHORS.eyeLineY} rx={8} ry={8.5} fill={INK} />
       ))}
       {/* Catchlights — the difference between "eyes" and "two dark holes" */}
       <Circle cx={80.5} cy={85} r={2.6} fill={CREAM} opacity={0.9} />
@@ -323,10 +347,10 @@ export default function CatMascot({ size = 180, style }: CatMascotProps) {
   const headPivotY = (124 - CANVAS_H / 2) * S;
   const tailPivotX = (140 - CANVAS_W / 2) * S; // tail base
   const tailPivotY = (164 - CANVAS_H / 2) * S;
-  const eyesPivotY = (88 - CANVAS_H / 2) * S; // eye line
-  const earPivotY = (60 - CANVAS_H / 2) * S; // ear bases
-  const earLPivotX = (78 - CANVAS_W / 2) * S;
-  const earRPivotX = (122 - CANVAS_W / 2) * S;
+  const eyesPivotY = (HEAD_ANCHORS.eyeLineY - CANVAS_H / 2) * S;
+  const earPivotY = (HEAD_ANCHORS.earPivotY - CANVAS_H / 2) * S;
+  const earLPivotX = (HEAD_ANCHORS.earLPivotX - CANVAS_W / 2) * S;
+  const earRPivotX = (HEAD_ANCHORS.earRPivotX - CANVAS_W / 2) * S;
 
   /** Seconds since mount, driven on the UI thread. */
   const clock = useSharedValue(0);

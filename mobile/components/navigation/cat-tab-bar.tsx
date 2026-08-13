@@ -1,6 +1,6 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import * as Haptics from 'expo-haptics';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import {
   Easing,
@@ -14,11 +14,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import CatTabIcon from '@/components/navigation/cat-tab-icon';
+import CatMascotHead, { type CatMascotHeadHandle } from '@/components/mascot/cat-mascot-head';
 import { PlusIcon } from '@/components/home/cat-icons';
 import QuickActionsSheet from '@/components/navigation/quick-actions-sheet';
 import { Pressable, Text, View } from '@/tw';
 import { Animated } from '@/tw/animated';
-import { Image } from '@/tw/image';
 import { SheetStackProvider } from '@/components/navigation/sheet-stack-context';
 import SuccessToast from '@/components/ui/success-toast';
 
@@ -131,13 +131,21 @@ function TabItem({
 function FabButton({ onPress, active }: { onPress: () => void; active: boolean }) {
   const scale = useSharedValue(1);
   const activeProgress = useSharedValue(0);
+  const head = useRef<CatMascotHeadHandle>(null);
+  const wasActive = useRef(false);
 
   useEffect(() => {
     activeProgress.value = withSpring(active ? 1 : 0, { damping: 15, stiffness: 150 });
+
+    // Bounce the head as it fades back in after the sheet closes — but not on
+    // first mount, where there is no return to punctuate.
+    if (wasActive.current && !active) head.current?.settle();
+    wasActive.current = active;
   }, [active, activeProgress]);
 
   const handlePressIn = () => {
     scale.value = withTiming(0.90, { duration: 80 });
+    head.current?.perk();
   };
 
   const handlePressOut = () => {
@@ -180,13 +188,9 @@ function FabButton({ onPress, active }: { onPress: () => void; active: boolean }
         ]}
       >
         <Animated.View style={[{ position: 'absolute' }, catStyle]}>
-          <Image
-            source={require('@/assets/images/fg/fg-home-idle.png')}
-            className="w-10 h-10"
-            contentFit="contain"
-          />
+          <CatMascotHead ref={head} size={44} />
         </Animated.View>
-        
+
         <Animated.View style={[{ position: 'absolute' }, closeIconStyle]}>
           <PlusIcon size={24} color="#ea580c" />
         </Animated.View>

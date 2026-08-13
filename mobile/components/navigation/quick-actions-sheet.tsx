@@ -15,9 +15,9 @@ import {
 import QuickActionRow from '@/components/home/quick-action-row';
 import { QUICK_ACTIONS, type QuickAction } from '@/components/home/quick-actions';
 import { PlusIcon } from '@/components/home/cat-icons';
+import CatMascotHead from '@/components/mascot/cat-mascot-head';
 import { Pressable, View } from '@/tw';
 import { Animated } from '@/tw/animated';
-import { Image } from '@/tw/image';
 import { useSheetStack } from './sheet-stack-context';
 import BudgetEditSheet from './budget-edit-sheet';
 
@@ -220,12 +220,10 @@ export default function QuickActionsSheet({ visible, onClose, onSaveSuccess, onC
                 replicaFabStyle,
               ]}
             >
+              {/* Only ever seen mid-crossfade, but it has to match the real FAB
+                  underneath or the head visibly swaps as the sheet opens. */}
               <Animated.View style={[{ position: 'absolute' }, replicaCatStyle]}>
-                <Image
-                  source={require('@/assets/images/fg/fg-home-idle.png')}
-                  className="w-10 h-10"
-                  contentFit="contain"
-                />
+                <CatMascotHead size={44} />
               </Animated.View>
 
               <Animated.View style={[{ position: 'absolute' }, replicaIconStyle]}>
